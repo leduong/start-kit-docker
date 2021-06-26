@@ -1,20 +1,20 @@
 version: '3.5'
 
 services:
-  nginx:
-    image: nginx:latest
-    container_name: 'nginx'
-    ports:
-      - ${NGINX_PORT:-8123}:80
-    volumes:
-      - ./config/nginx/conf.d:/etc/nginx/conf.d
-      - ./config/nginx/uwsgi_params:/etc/nginx/uwsgi_params
-      - ./log/nginx:/var/log/nginx
-    depends_on:
-      - app
-    restart: always
-    environment:
-      TZ: Asia/Tokyo
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: 'nginx'
+  #   ports:
+  #     - ${NGINX_PORT:-8123}:80
+  #   volumes:
+  #     - ./config/nginx/conf.d:/etc/nginx/conf.d
+  #     - ./config/nginx/uwsgi_params:/etc/nginx/uwsgi_params
+  #     - ./log/nginx:/var/log/nginx
+  #   depends_on:
+  #     - app
+  #   restart: always
+  #   environment:
+  #     TZ: Asia/Tokyo
 
   redis_db:
     image: redis:latest
@@ -73,6 +73,7 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    container_name: 'elasticsearch'
     environment:
       discovery.type: single-node
     networks:
@@ -80,11 +81,12 @@ services:
 
   dockerize:
     image: jwilder/dockerize
+    container_name: 'dockerize'
 
   # TODO: In-processing
   # app:
   #   build:
-    
+
   #   depends_on:
   #     - "${REDIS_DB:-redis_db}"
   #     - "${MYSQL_DB:-mysql_db}"
@@ -93,6 +95,56 @@ services:
   #     - "elasticsearch"
   #   stdin_open: true
   #   tty: true
+  angular:
+    build:
+      context: ./webapp/angular
+      dockerfile: Dockerfile
+    container_name: 'angular'
+    environment:
+      - NODE_ENV=development
+    ports:
+      - ${ANGULAR_PORT:-8020}:4200
+    volumes:
+      - ./webapp/angular:/app
+      - '/app/node_modules'
+    stdin_open: true
+    command: 'yarn start'
+
+  reactjs:
+    build:
+      context: ./webapp/reactjs
+      dockerfile: Dockerfile
+    container_name: 'reactjs'
+    environment:
+      - NODE_ENV=development
+    ports:
+      - ${REACTJS_PORT:-8030}:3000
+    volumes:
+      - ./webapp/reactjs:/app
+      - '/app/node_modules'
+    stdin_open: true
+    command: 'yarn start'
+
+  # laravel:
+  #   container_name: laravel
+  #   build:
+  #     context: ./webapp/laravel
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "${LARAVEL_PORT:-8000}:80"
+  #   environment:
+  #     LARAVEL_SAIL: 1
+  #   volumes:
+  #     - "./webapp/laravel:/var/www/html"
+  #   networks:
+  #     - myapp
+
+  #   #   depends_on:
+  #   #     - "${REDIS_DB:-redis_db}"
+  #   #     - "${MYSQL_DB:-mysql_db}"
+  #   #     - "${MONGO_DB:-mongo_db}"
+  #   #     - "${POSTGRES_DB:-postgres_db}"
+  #   #     - "elasticsearch"
 
 networks:
   myapp:
