@@ -1,14 +1,14 @@
-version: '3'
+version: '3.5'
 
 services:
   nginx:
     image: nginx:latest
-    container_name: "nginx"
+    container_name: 'nginx'
     ports:
-      - 80:80
+      - ${NGINX_PORT:-8123}:80
     volumes:
-      - ./service/nginx/conf.d:/etc/nginx/conf.d
-      - ./service/nginx/uwsgi_params:/etc/nginx/uwsgi_params
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./config/nginx/uwsgi_params:/etc/nginx/uwsgi_params
       - ./log/nginx:/var/log/nginx
     depends_on:
       - app
@@ -16,9 +16,9 @@ services:
     environment:
       TZ: Asia/Tokyo
 
-  redis:
+  redis_db:
     image: redis:latest
-    container_name: 'db-redis'
+    container_name: 'redis_db'
     ports:
       - '${REDIS_PORT:-6379}:6379'
     volumes:
@@ -28,32 +28,71 @@ services:
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
 
-  mysql:
+  mysql_db:
     image: mysql:5.7
-    container_name: 'db-mysql'
+    container_name: 'mysql_db'
     environment:
-      MYSQL_ROOT_PASSWORD: iD0ntKn0w
+      MYSQL_DATABASE: myapp
+      MYSQL_ROOT_PASSWORD: il0veYou
       TZ: 'Azia/Tokyo'
     ports:
       - '${MYSQL_PORT:-3306}:3306'
     volumes:
-      - ./service/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./config/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./data/mysql:/var/lib/mysql
     networks:
       - myapp
 
   mongodb:
     image: mongo:latest
-    container_name: 'db-mongodb'
+    container_name: 'mongo_db'
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: iD0ntKn0w
+      MONGO_INITDB_ROOT_PASSWORD: il0veYou
     ports:
       - '${MONGO_PORT:-27017}:27017'
     volumes:
       - ./data/mongo:/data/db
     networks:
       - myapp
+
+  postgres_db:
+    image: postgres:9.6
+    container_name: 'postgres_db'
+    # restart: always
+    environment:
+      POSTGRES_DB: postgres_db
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: il0veYou
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    networks:
+      - myapp
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    environment:
+      discovery.type: single-node
+    networks:
+      - myapp
+
+  dockerize:
+    image: jwilder/dockerize
+
+  # TODO: In-processing
+  # app:
+  #   build:
+    
+  #   depends_on:
+  #     - "${REDIS_DB:-redis_db}"
+  #     - "${MYSQL_DB:-mysql_db}"
+  #     - "${MONGO_DB:-mongo_db}"
+  #     - "${POSTGRES_DB:-postgres_db}"
+  #     - "elasticsearch"
+  #   stdin_open: true
+  #   tty: true
 
 networks:
   myapp:
