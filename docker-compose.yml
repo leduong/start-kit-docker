@@ -206,6 +206,19 @@ services:
     stdin_open: true
     command: 'python manage.py runserver 0.0.0.0:8000'
 
+  fastapi:
+    build:
+      context: ./webapp/fastapi
+      dockerfile: Dockerfile
+    container_name: 'fastapi'
+    environment:
+      - DEBUG=true
+    ports:
+      - ${FASTAPI_PORT:-8000}:8000
+    volumes:
+      - ./webapp/fastapi:/app
+    command: 'uvicorn main:app --host 0.0.0.0'
+
   flask:
     build:
       context: ./webapp/flask
@@ -217,29 +230,8 @@ services:
       - ${FLASK_PORT:-5000}:5000
     volumes:
       - ./webapp/flask:/app
-    stdin_open: true
     command: 'python -m app'
 
-  # laravel:
-  #   container_name: laravel
-  #   build:
-  #     context: ./webapp/laravel
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "${LARAVEL_PORT:-8000}:80"
-  #   environment:
-  #     LARAVEL_SAIL: 1
-  #   volumes:
-  #     - "./webapp/laravel:/var/www/html"
-  #   networks:
-  #     - myapp
-
-  #   #   depends_on:
-  #   #     - "${REDIS_DB:-redis_db}"
-  #   #     - "${MYSQL_DB:-mysql_db}"
-  #   #     - "${MONGO_DB:-mongo_db}"
-  #   #     - "${POSTGRES_DB:-postgres_db}"
-  #   #     - "elasticsearch"
   slim:
     build:
       context: ./webapp/slim
@@ -251,7 +243,7 @@ services:
       - ${FLASK_PORT:-8081}:8081
     volumes:
       - ./webapp/slim:/app
-      - ./webapp/slim/logs:/var/www/logs
+      - ./logs:/var/www/logs
 
   lumen:
     build:
@@ -264,7 +256,7 @@ services:
       - ${FLASK_PORT:-8082}:8082
     volumes:
       - ./webapp/lumen:/app
-      - ./webapp/lumen/logs:/var/www/logs
+      - ./logs:/var/www/logs
     networks:
       - myapp
     depends_on:
@@ -282,7 +274,7 @@ services:
       - ${LARAVEL_PORT:-8083}:8083
     volumes:
       - ./webapp/laravel:/app
-      - ./webapp/laravel/logs:/var/www/logs
+      - ./logs:/var/www/logs
     networks:
       - myapp
     depends_on:
