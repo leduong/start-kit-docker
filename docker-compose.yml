@@ -27,6 +27,13 @@ services:
       - myapp
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+    
+  mssql:
+    image: "mcr.microsoft.com/mssql/server"
+    container_name: 'mssql_db'
+    environment:
+        SA_PASSWORD: "il0veYou"
+        ACCEPT_EULA: "Y"
 
   mysql_db:
     image: mysql:5.7
