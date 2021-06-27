@@ -27,16 +27,16 @@ services:
       - myapp
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
-    
+
   mssql:
-    image: "mcr.microsoft.com/mssql/server"
+    image: 'mcr.microsoft.com/mssql/server'
     container_name: 'mssql_db'
     environment:
-        SA_PASSWORD: "il0veYou"
-        ACCEPT_EULA: "Y"
+      SA_PASSWORD: 'il0veYou'
+      ACCEPT_EULA: 'Y'
 
   mysql_db:
-    image: mysql:5.7
+    image: mysql:5.6
     container_name: 'mysql_db'
     environment:
       MYSQL_DATABASE: myapp
@@ -162,6 +162,36 @@ services:
     stdin_open: true
     command: 'yarn dev'
 
+  expressjs:
+    build:
+      context: ./webapp/expressjs
+      dockerfile: Dockerfile
+    container_name: 'expressjs'
+    environment:
+      - NODE_ENV=development
+    ports:
+      - ${EXPRESSJS_PORT:-8080}:3000
+    volumes:
+      - ./webapp/expressjs:/app
+      - '/app/node_modules'
+    stdin_open: true
+    command: 'yarn dev'
+
+  nodejs:
+    build:
+      context: ./webapp/nodejs
+      dockerfile: Dockerfile
+    container_name: 'nodejs'
+    environment:
+      - NODE_ENV=development
+    ports:
+      - ${NODEJS_PORT:-8080}:8080
+    volumes:
+      - ./webapp/nodejs:/app
+      - '/app/node_modules'
+    stdin_open: true
+    command: 'yarn start'
+
   django:
     build:
       context: ./webapp/django
@@ -188,7 +218,7 @@ services:
     volumes:
       - ./webapp/flask:/app
     stdin_open: true
-    command: 'python manage.py'
+    command: 'python -m app'
 
   # laravel:
   #   container_name: laravel
@@ -210,6 +240,66 @@ services:
   #   #     - "${MONGO_DB:-mongo_db}"
   #   #     - "${POSTGRES_DB:-postgres_db}"
   #   #     - "elasticsearch"
+  slim:
+    build:
+      context: ./webapp/slim
+      dockerfile: Dockerfile
+    container_name: 'slim'
+    environment:
+      docker: 'true'
+    ports:
+      - ${FLASK_PORT:-8081}:8081
+    volumes:
+      - ./webapp/slim:/app
+      - ./webapp/slim/logs:/var/www/logs
+
+  lumen:
+    build:
+      context: ./webapp/lumen
+      dockerfile: Dockerfile
+    container_name: 'lumen'
+    environment:
+      docker: 'true'
+    ports:
+      - ${FLASK_PORT:-8082}:8082
+    volumes:
+      - ./webapp/lumen:/app
+      - ./webapp/lumen/logs:/var/www/logs
+    networks:
+      - myapp
+    depends_on:
+      - '${REDIS_DB:-redis_db}'
+      - '${MYSQL_DB:-mysql_db}'
+
+  laravel:
+    build:
+      context: ./webapp/laravel
+      dockerfile: Dockerfile
+    container_name: 'laravel'
+    environment:
+      docker: 'true'
+    ports:
+      - ${LARAVEL_PORT:-8083}:8083
+    volumes:
+      - ./webapp/laravel:/app
+      - ./webapp/laravel/logs:/var/www/logs
+    networks:
+      - myapp
+    depends_on:
+      - '${REDIS_DB:-redis_db}'
+      - '${MYSQL_DB:-mysql_db}'
+
+  golang:
+    build:
+      context: ./webapp/golang
+      dockerfile: Dockerfile
+    container_name: 'golang'
+    environment:
+      docker: 'true'
+    ports:
+      - ${GOLANG_PORT:-8084}:8080
+    volumes:
+      - ./webapp/golang:/app
 
 networks:
   myapp:

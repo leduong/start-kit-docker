@@ -11,7 +11,6 @@ sudo apt install docker.io docker-compose make
 sudo snap install code --classic
 ```
 
-
 ### How to Start
 
 ```
@@ -23,4 +22,19 @@ $ make down
 
 # Deploy heroku
 $ make heroku
+```
+
+#### EXPRESSJS
+
+```
+docker-compose up expressjs
+docker-compose exec expressjs yarn migrate
+```
+
+#### LARAVEL, LUMEN, SLIM
+
+Run `composer install` if need
+
+```
+docker-compose exec laravel composer install
 ```

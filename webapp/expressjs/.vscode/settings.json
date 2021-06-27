@@ -1,0 +1,17 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnPaste": true,
+  "editor.minimap.maxColumn": 100,
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "prettier.printWidth": 100,
+  "prettier.singleQuote": true,
+  "prettier.semi": true,
+  "prettier.arrowParens": "avoid",
+  "prettier.trailingComma": "all",
+  "[javascript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  }
+}
