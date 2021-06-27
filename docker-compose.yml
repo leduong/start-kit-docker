@@ -50,7 +50,7 @@ services:
     networks:
       - myapp
 
-  mongodb:
+  mongo_db:
     image: mongo:latest
     container_name: 'mongo_db'
     environment:
@@ -90,18 +90,24 @@ services:
     image: jwilder/dockerize
     container_name: 'dockerize'
 
-  # TODO: In-processing
-  # app:
-  #   build:
+  gofiber:
+    build:
+      context: ./webapp/gofiber
+      dockerfile: Dockerfile
+    container_name: 'gofiber'
+    environment:
+      - GO_ENV=development
+    ports:
+      - ${GOFIBER_PORT:-3000}:3000
+    volumes:
+      - ./webapp/gofiber:/app
+    stdin_open: true
+    command: 'go run main.go'
+    depends_on:
+      - '${MONGO_DB:-mongo_db}'
+    networks:
+      - myapp
 
-  #   depends_on:
-  #     - "${REDIS_DB:-redis_db}"
-  #     - "${MYSQL_DB:-mysql_db}"
-  #     - "${MONGO_DB:-mongo_db}"
-  #     - "${POSTGRES_DB:-postgres_db}"
-  #     - "elasticsearch"
-  #   stdin_open: true
-  #   tty: true
   angular:
     build:
       context: ./webapp/angular
