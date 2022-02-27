@@ -2,10 +2,11 @@
 node_modules
 yarn.lock
 
-# Data Storage
-data/mongo
-data/mysql
-data/redis
+# Data && Session Storage
+data/*
+sessions/*
+!data/.gitkeep
+!sessions/.gitkeep
 
 
 #python
